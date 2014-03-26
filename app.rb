@@ -36,7 +36,7 @@ post '/records?' do
 end
 
 post '/records/csv?' do
-  content_type :text
+  content_type 'application/octet-stream'
   polygon=JSON.parse params[:boundary] 
   geometry=polygon['geometry']
   results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
@@ -46,7 +46,9 @@ post '/records/csv?' do
   results.each do |record|
    t << record.values
   end
-  t
+  text=t.to_s
+  attachment('records.csv')
+  text
 end
 
 get '/documents/?' do
