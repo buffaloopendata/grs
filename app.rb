@@ -37,20 +37,28 @@ post '/records?' do
   settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a.to_json
 end
 
+
 post '/records/csv?' do
-  content_type 'application/octet-stream'
+#  content_type 'application/octet-stream'
   polygon=JSON.parse params[:boundary] 
   geometry=polygon['geometry']
-  results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
-  #csvresults = results.each_with_object([]) { |i,mem| mem << i.to_a}.flatten.to_csv
-  header=CSV::Row.new(results[0].keys,results[0].keys,true)
-  t = CSV::Table.new([header])
-  results.each do |record|
-   t << record.values
+  filename=geometry['coordinates'].join[0..180].gsub! /[.-]/,''
+  File.open("./datasets/#{filename}.part", "w") {}
+
+  Spawnling.new do
+    results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
+    CSV.open("./datasets/#{filename}.part", 'w') do |writer|
+      writer << results[0].keys
+      results.each do |record|
+        writer << record.values
+      end
+    end
+    File.rename("./datasets/#{filename}.part", "./datasets/#{filename}.csv")
   end
-  text=t.to_s
-  attachment('records.csv')
-  text
+
+  "Processing your request right over <a href='/dataset/#{filename}'>Here</a>"
+  redirect to "/dataset/#{filename}"
+#  attachment('records.csv')
 end
 
 get '/documents/?' do
