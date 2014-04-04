@@ -1,8 +1,10 @@
 require 'json'
+require 'spawnling'
 require 'csv'
 require 'mongo'
 require 'sinatra'
 require 'logger'
+require 'pp'
 include Mongo
 
 enable :logging
@@ -56,3 +58,45 @@ get '/documents/?' do
   settings.mongo_db['realproperty'].find.to_a[0].to_json
 end
 
+post '/test?' do
+  content_type :json
+  polygon=JSON.parse params[:boundary] 
+  geometry=polygon['geometry']
+  pp settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).explain
+end
+
+get '/dataset/:id' do |id|
+  if File.exists? "./datasets/#{id}.csv"
+    'existance!'
+     content_type 'application/octet-stream'
+     attachment "./datasets/#{id}.csv"  
+  elsif File.exists? "./datasets/#{id}.part"
+    'still processing refresh the page in a few seconds...'
+  else 
+    'rerun your selection'
+  end 
+end
+
+
+post '/test/csv?' do
+#  content_type 'application/octet-stream'
+  polygon=JSON.parse params[:boundary] 
+  geometry=polygon['geometry']
+  filename=geometry['coordinates'].join[0..180].gsub! /[.-]/,''
+  File.open("./datasets/#{filename}.part", "w") {}
+
+  Spawnling.new do
+    results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
+    CSV.open("./datasets/#{filename}.part", 'w') do |writer|
+      writer << results[0].keys
+      results.each do |record|
+        writer << record.values
+      end
+    end
+    File.rename("./datasets/#{filename}.part", "./datasets/#{filename}.csv")
+  end
+
+  "Processing your request right over <a href='/dataset/#{filename}'>Here</a>"
+  redirect to "/dataset/#{filename}"
+#  attachment('records.csv')
+end
