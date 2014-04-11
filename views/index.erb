@@ -4,6 +4,7 @@
 <link rel="stylesheet" href="leaflet.draw.css" />
 <script src="./leaflet.draw.js"></script>
 	<div id="map" style="width: 800px; height: 600px"></div>
+<title> Record Selection</title>
 </head>
 		
 <script>
@@ -31,7 +32,18 @@ map.on('draw:created', function (e) {
 
 
 </script>
-<input type="button" id="report" value="Report" onclick="getArea('map.drawnItems');" class="btnStyle span3" />
 
+<form action = "/records/csv" method = "post" id="getrecordscsv">
+        <input type="submit" name="boundary" value="Get CSV Records" onclick="getrecordscsv.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
+
+
+<form action = "/records" method = "post" id="getrecords">
+        <input type="submit" name="boundary" value="Get JSON Records" onclick="getrecords.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
+
+<form action = "/test/csv" method = "post" id="test">
+        <input type="submit" name="boundary" value="Debugging Purposes" onclick="test.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
 
 

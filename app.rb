@@ -1,3 +1,4 @@
+require "sinatra/reloader"
 require 'json'
 require 'spawnling'
 require 'csv'
@@ -25,9 +26,13 @@ enable :show_execptions
 
 configure do
   use ::Rack::CommonLogger, access_logger
-  conn = MongoClient.new("localhost", 27017)
+  conn = MongoClient.new()
   set :mongo_connection, conn
   set :mongo_db, conn.db('citydata')
+end
+
+get '/' do
+  erb :index
 end
 
 post '/records?' do
