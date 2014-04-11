@@ -91,13 +91,19 @@ post '/test/csv?' do
   polygon=JSON.parse params[:boundary] 
   geometry=polygon['geometry']
   filename=geometry['coordinates'].join[0..180].gsub! /[.-]/,''
+
+  if File.exists? "./datasets/#{filename}.csv"
+    redirect to "/dataset/#{filename}"
+  end
+
   File.open("./datasets/#{filename}.part", "w") {}
 
   Spawnling.new do
-    results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
+    results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}})
     CSV.open("./datasets/#{filename}.part", 'w') do |writer|
-      writer << results[0].keys
-      results.each do |record|
+      #writer << results[0].keys
+      #results.each do |record|
+      settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).each do |record|
         writer << record.values
       end
     end
@@ -106,5 +112,4 @@ post '/test/csv?' do
 
   "Processing your request right over <a href='/dataset/#{filename}'>Here</a>"
   redirect to "/dataset/#{filename}"
-#  attachment('records.csv')
 end
