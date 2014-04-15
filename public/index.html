@@ -1,0 +1,49 @@
+<head> 
+<link rel="stylesheet" href="leaflet.css" />
+<script src="./leaflet.js"></script>
+<link rel="stylesheet" href="leaflet.draw.css" />
+<script src="./leaflet.draw.js"></script>
+	<div id="map" style="width: 800px; height: 600px"></div>
+<title> Record Selection</title>
+</head>
+		
+<script>
+var map = L.map('map').setView([42.901206, -78.865002], 13);
+
+L.tileLayer('http://{s}.tile.cloudmade.com/2d1457c7e0bf4a66b6fe642f4b1146d0/997/256/{z}/{x}/{y}.png').addTo(map);
+
+
+// Initialise the FeatureGroup to store editable layers
+var drawnItems = new L.FeatureGroup();
+map.addLayer(drawnItems);
+
+// Initialise the draw control and pass it the FeatureGroup of editable layers
+var drawControl = new L.Control.Draw({draw:{polyline: false, marker: false}, edit: {featureGroup: drawnItems}});
+map.addControl(drawControl);
+
+map.on('draw:created', function (e) {
+    var type = e.layerType,
+        layer = e.layer;
+
+    // Do whatever else you need to. (save to db, add to map etc)
+    //map.addLayer(layer);
+    drawnItems.addLayer(layer);
+});
+
+
+</script>
+
+<form action = "/records/csv" method = "post" id="getrecordscsv">
+        <input type="submit" name="boundary" value="Get CSV Records" onclick="getrecordscsv.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
+
+
+<form action = "/records" method = "post" id="getrecords">
+        <input type="submit" name="boundary" value="Get JSON Records" onclick="getrecords.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
+
+<form action = "/test/csv" method = "post" id="test">
+        <input type="submit" name="boundary" value="Debugging Purposes" onclick="test.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
+
+
