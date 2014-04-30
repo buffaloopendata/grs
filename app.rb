@@ -2,10 +2,11 @@ require "sinatra/reloader"
 require 'json'
 require 'spawnling'
 require 'csv'
-require 'mongo'
+#require 'mongo'
 require 'sinatra'
 require 'logger'
 require 'pp'
+require 'mongo/driver'
 include Mongo
 
 enable :logging
@@ -64,6 +65,27 @@ post '/records/csv?' do
   "Processing your request right over <a href='/dataset/#{filename}'>Here</a>"
   redirect to "/dataset/#{filename}"
 #  attachment('records.csv')
+end
+
+post '/calculate/sqft/?' do
+  polygon=JSON.parse params[:boundary]
+  area=params[:sqft]
+  geometry=polygon['geometry']
+  element='$assessment'
+#  results=settings.mongo_db['realproperty'].aggregate([
+#    {'$match' => {"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}},
+#    {'$group'=>{'_id'=>'', 'total' =>{'$sum'=> '$amount'}}}
+#    ])
+  results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
+  dollars=0
+  sqft=0
+  results.each do |row|
+    dollars+=row['assessment'].to_i
+   # sqft+=row['squareft'].to_i
+    sqft+=row['frontage'].to_i*row['depth'].to_i
+  end
+
+  (dollars/sqft).to_s
 end
 
 get '/documents/?' do

@@ -1,4 +1,5 @@
 <head> 
+<script src="./jquery-2.1.0.min.js"></script>
 <link rel="stylesheet" href="leaflet.css" />
 <script src="./leaflet.js"></script>
 <link rel="stylesheet" href="leaflet.draw.css" />
@@ -42,8 +43,10 @@ map.on('draw:created', function (e) {
         <input type="submit" name="boundary" value="Get JSON Records" onclick="getrecords.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
 
-<form action = "/test/csv" method = "post" id="test">
+<form action = "/calculate/sqft" method = "post" id="test">
         <input type="submit" name="boundary" value="Debugging Purposes" onclick="test.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
+
+$.post("/calculate/sqft",{sqft: '5000',boundary:j})
 
 
