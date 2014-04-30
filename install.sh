@@ -9,4 +9,4 @@ gem install pp
 gem install spawnling
 gem install json
 gem install multi_json
-mongorestore
+unzip db.zip
