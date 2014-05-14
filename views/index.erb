@@ -11,8 +11,8 @@
 <script>
 var map = L.map('map').setView([42.901206, -78.865002], 13);
 
-L.tileLayer('http://{s}.tile.cloudmade.com/2d1457c7e0bf4a66b6fe642f4b1146d0/997/256/{z}/{x}/{y}.png').addTo(map);
 
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
 // Initialise the FeatureGroup to store editable layers
 var drawnItems = new L.FeatureGroup();
@@ -43,10 +43,13 @@ map.on('draw:created', function (e) {
         <input type="submit" name="boundary" value="Get JSON Records" onclick="getrecords.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
 
-<form action = "/calculate/sqft" method = "post" id="test">
-        <input type="submit" name="boundary" value="Debugging Purposes" onclick="test.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+<form action = "/calculate/sqft" method = "post" id="sqft">
+        <input type="submit" name="boundary" value="Calculate Price/Sqft" onclick="sqft.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
 
-$.post("/calculate/sqft",{sqft: '5000',boundary:j})
+<form action = "/sales" method = "post" id="sales">
+        <input type="submit" name="boundary" value="Get Sales" onclick="sales.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+</form>
+
 
 

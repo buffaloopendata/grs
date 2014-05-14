@@ -19,28 +19,65 @@ enable :show_execptions
   access_logger = ::Logger.new(access_log)
   error_logger = ::File.new(::File.join(::File.dirname(::File.expand_path(__FILE__)),'','log','error.log'),"a+")
   error_logger.sync = true
- 
- 
   before {
     env["rack.errors"] =  error_logger
   }
 
+
 configure do
   use ::Rack::CommonLogger, access_logger
-  conn = MongoClient.new()
+  conn = MongoClient.new(:logger=>access_logger)
   set :mongo_connection, conn
   set :mongo_db, conn.db('citydata')
 end
+
+helpers do
+  def geoWithin(boundary, collection='realproperty') 
+    polygon=JSON.parse boundary
+    geometry=polygon['geometry']
+    settings.mongo_db[collection].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}})
+  end
+
+  def geoWithinSales(boundary, startDate, endDate, collection='citysales')
+    polygon=JSON.parse boundary
+    geometry=polygon['geometry']
+    settings.mongo_db[collection].find({
+       "location"=>{'$geoWithin'=>{'$geometry'=> geometry}},
+       'sales'=>{'$elemMatch'=>{ 'deedate'=>{"$lt"=>20140101}}},
+       'sales'=>{'$elemMatch'=>{ 'deedate'=>{"$gt"=>20120101}}}
+      })
+  end
+
+  def geoWithinIndivSales(boundary, startDate, endDate, collection='cityindivsales')
+    polygon=JSON.parse boundary
+    geometry=polygon['geometry']
+    settings.mongo_db[collection].find({
+       "location"=>{'$geoWithin'=>{'$geometry'=> geometry}},
+        'deedate'=>{"$lt"=>20140101},
+        'deedate'=>{"$gt"=>20120101}
+      })
+  end
+end 
 
 get '/' do
   erb :index
 end
 
+post '/calculate/flipping' do
+  
+end
+
+post '/sales?' do
+  startdate=20120101
+  enddate=20130101
+  sales=geoWithinIndivSales(params[:boundary],startdate,enddate)
+  sales.to_a.to_json
+end
+
+
 post '/records?' do
-  content_type :json
-  polygon=JSON.parse params[:boundary] 
-  geometry=polygon['geometry']
-  settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a.to_json
+  records=geoWithin params[:boundary]
+  records.to_a.to_json
 end
 
 
@@ -64,19 +101,11 @@ post '/records/csv?' do
 
   "Processing your request right over <a href='/dataset/#{filename}'>Here</a>"
   redirect to "/dataset/#{filename}"
-#  attachment('records.csv')
 end
 
 post '/calculate/sqft/?' do
-  polygon=JSON.parse params[:boundary]
+  results=geoWithin params[:boundary]
   area=params[:sqft]
-  geometry=polygon['geometry']
-  element='$assessment'
-#  results=settings.mongo_db['realproperty'].aggregate([
-#    {'$match' => {"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}},
-#    {'$group'=>{'_id'=>'', 'total' =>{'$sum'=> '$amount'}}}
-#    ])
-  results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).to_a
   dollars=0
   sqft=0
   results.each do |row|
@@ -84,20 +113,7 @@ post '/calculate/sqft/?' do
    # sqft+=row['squareft'].to_i
     sqft+=row['frontage'].to_i*row['depth'].to_i
   end
-
   (dollars/sqft).to_s
-end
-
-get '/documents/?' do
-  content_type :json
-  settings.mongo_db['realproperty'].find.to_a[0].to_json
-end
-
-post '/test?' do
-  content_type :json
-  polygon=JSON.parse params[:boundary] 
-  geometry=polygon['geometry']
-  pp settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).explain
 end
 
 get '/dataset/:id' do |id|
@@ -113,30 +129,3 @@ get '/dataset/:id' do |id|
 end
 
 
-post '/test/csv?' do
-#  content_type 'application/octet-stream'
-  polygon=JSON.parse params[:boundary] 
-  geometry=polygon['geometry']
-  filename=geometry['coordinates'].join[0..180].gsub! /[.-]/,''
-
-  if File.exists? "./datasets/#{filename}.csv"
-    redirect to "/dataset/#{filename}"
-  end
-
-  File.open("./datasets/#{filename}.part", "w") {}
-
-  Spawnling.new do
-    results=settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}})
-    CSV.open("./datasets/#{filename}.part", 'w') do |writer|
-      #writer << results[0].keys
-      #results.each do |record|
-      settings.mongo_db['realproperty'].find({"location"=>{'$geoWithin'=>{'$geometry'=>geometry}}}).each do |record|
-        writer << record.values
-      end
-    end
-    File.rename("./datasets/#{filename}.part", "./datasets/#{filename}.csv")
-  end
-
-  "Processing your request right over <a href='/dataset/#{filename}'>Here</a>"
-  redirect to "/dataset/#{filename}"
-end
