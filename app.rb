@@ -43,8 +43,8 @@ helpers do
     geometry=polygon['geometry']
     settings.mongo_db[collection].find({
        "location"=>{'$geoWithin'=>{'$geometry'=> geometry}},
-       'sales'=>{'$elemMatch'=>{ 'deedate'=>{"$lt"=>20140101}}},
-       'sales'=>{'$elemMatch'=>{ 'deedate'=>{"$gt"=>20120101}}}
+       'sales'=>{'$elemMatch'=>{ 'deedate'=>{"$lt"=>endDate}}},
+       'sales'=>{'$elemMatch'=>{ 'deedate'=>{"$gt"=>startDate}}}
       })
   end
 
@@ -52,9 +52,11 @@ helpers do
     polygon=JSON.parse boundary
     geometry=polygon['geometry']
     settings.mongo_db[collection].find({
-       "location"=>{'$geoWithin'=>{'$geometry'=> geometry}},
-        'deedate'=>{"$lt"=>20140101},
-        'deedate'=>{"$gt"=>20120101}
+       "$and"=>
+         [{"location"=>{'$geoWithin'=>{'$geometry'=> geometry}}},
+          {'deedate'=>{"$lt"=>endDate}},
+          {'deedate'=>{"$gt"=>startDate}}
+         ]
       })
   end
 end 
@@ -69,7 +71,7 @@ end
 
 post '/sales?' do
   startdate=20120101
-  enddate=20130101
+  enddate=20120130
   sales=geoWithinIndivSales(params[:boundary],startdate,enddate)
   sales.to_a.to_json
 end
