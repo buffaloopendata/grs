@@ -1,0 +1,1 @@
+{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "citydata.realproperty", "name" : "_id_" }, { "v" : 1, "key" : { "sbl" : 1 }, "unique" : true, "ns" : "citydata.realproperty", "name" : "sbl_1", "dropDups" : true }, { "v" : 1, "key" : { "location" : "2dsphere" }, "ns" : "citydata.realproperty", "name" : "location_2dsphere" } ] }

@@ -1,0 +1,1 @@
+{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "citydata.crime", "name" : "_id_" }, { "v" : 1, "key" : { "id" : 1 }, "unique" : true, "ns" : "citydata.crime", "name" : "id_1", "dropDups" : true } ] }

@@ -66,7 +66,30 @@ get '/' do
 end
 
 post '/calculate/flipping' do
-  
+  startdate=20090101
+  enddate=20130101
+  properties=geoWithinSales(params[:boundary],startdate,enddate)
+  selection=[]
+  #find('sales'=> {'$elemMatch'=>{'deedtype'=> "T- Tax Sale"}}).each do |row|
+  properties.each do |row|
+    row['sales'].each.with_index do |sale, idx|
+      if row['sales'][idx+1].nil?
+        next
+      end
+      currentSaleDate=Date.strptime(sale['deedate'].to_s, '%Y%m%d')
+      nextSaleDate=Date.strptime row['sales'][idx+1]['deedate'].to_s, '%Y%m%d'
+      
+
+      currentSalePrice=sale['saleprice'][1..-1].to_f
+      nextSalePrice=row['sales'][idx+1]['saleprice'][1..-1].to_f
+      
+
+      if currentSalePrice*1.20<nextSalePrice and nextSaleDate-currentSaleDate<365
+        selection.push(row)
+      end
+    end
+  end
+  selection.to_a.to_json
 end
 
 post '/sales?' do

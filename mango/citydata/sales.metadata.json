@@ -1,0 +1,1 @@
+{ "indexes" : [ { "v" : 1, "key" : { "_id" : 1 }, "ns" : "citydata.sales", "name" : "_id_" }, { "v" : 1, "key" : { "sbl" : 1 }, "unique" : true, "ns" : "citydata.sales", "name" : "sbl_1", "dropDups" : true } ] }
