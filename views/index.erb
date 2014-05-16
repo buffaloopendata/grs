@@ -1,4 +1,8 @@
 <head> 
+<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+<link rel="stylesheet" href="/resources/demos/style.css">
 <script src="./jquery-2.1.0.min.js"></script>
 <link rel="stylesheet" href="leaflet.css" />
 <script src="./leaflet.js"></script>
@@ -48,10 +52,14 @@ map.on('draw:created', function (e) {
 </form>
 
 <form action = "/sales" method = "post" id="sales">
-        <input type="submit" name="boundary" value="Get Sales" onclick="sales.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+    <p>Date: <input type="text" name="startdate"></p>
+    <p>Date: <input type="text" name="enddate"></p>
+    <input type="submit" name="boundary" value="Get Sales" onclick="sales.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
 
 <form action = "/calculate/flipping" method = "post" id="flipping">
-        <input type="submit" name="boundary" value="Get Flipping" onclick="flipping.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
+    <p>Date: <input type="text" name="startdate"></p>
+    <p>Date: <input type="text" name="enddate"></p>
+    <input type="submit" name="boundary" value="Get Flipping" onclick="flipping.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
 

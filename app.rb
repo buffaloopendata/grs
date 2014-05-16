@@ -66,8 +66,8 @@ get '/' do
 end
 
 post '/calculate/flipping' do
-  startdate=20090101
-  enddate=20130101
+  startdate=params[:startdate].to_i
+  enddate=params[:enddate].to_i
   properties=geoWithinSales(params[:boundary],startdate,enddate)
   selection=[]
   #find('sales'=> {'$elemMatch'=>{'deedtype'=> "T- Tax Sale"}}).each do |row|
@@ -93,8 +93,8 @@ post '/calculate/flipping' do
 end
 
 post '/sales?' do
-  startdate=20120101
-  enddate=20120130
+  startdate=params[:startdate].to_i
+  enddate=params[:enddate].to_i
   sales=geoWithinIndivSales(params[:boundary],startdate,enddate)
   sales.to_a.to_json
 end
