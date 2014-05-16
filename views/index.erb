@@ -43,7 +43,7 @@ map.on('draw:created', function (e) {
 </form>
 
 
-<form action = "/property" method = "post" id="getrecords">
+<form action = "/property" method = "post" id="getproperty">
         <input type="submit" name="boundary" value="Get JSON Records" onclick="getproperty.boundary.value=JSON.stringify(drawnItems.getLayers()[0].toGeoJSON());" />
 </form>
 
