@@ -150,8 +150,9 @@ end
 get '/dataset/:id' do |id|
   if File.exists? "./datasets/#{id}.csv"
     'existance!'
-     content_type 'application/octet-stream'
-     attachment "./datasets/#{id}.csv"  
+ #    content_type 'application/octet-stream'
+ #    attachment "./datasets/#{id}.csv"  
+     send_file "./datasets/#{id}.csv"  
   elsif File.exists? "./datasets/#{id}.part"
     'still processing refresh the page in a few seconds...'
   else 
