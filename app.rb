@@ -65,7 +65,7 @@ get '/' do
   erb :index
 end
 
-post '/calculate/flipping' do
+post '/property/sales/flipping' do
   startdate=params[:startdate].to_i
   enddate=params[:enddate].to_i
   properties=geoWithinSales(params[:boundary],startdate,enddate)
@@ -99,14 +99,20 @@ post '/sales?' do
   sales.to_a.to_json
 end
 
+post '/sales/price/sqft' do
+  startdate=params[:startdate].to_i
+  enddate=params[:enddate].to_i
+  properties=geoWithinIndivSales(params[:boundary],startdate,enddate)
+end
 
-post '/records?' do
+
+post '/property?' do
   records=geoWithin params[:boundary]
   records.to_a.to_json
 end
 
 
-post '/records/csv?' do
+post '/property/csv?' do
 #  content_type 'application/octet-stream'
   polygon=JSON.parse params[:boundary] 
   geometry=polygon['geometry']
@@ -128,7 +134,7 @@ post '/records/csv?' do
   redirect to "/dataset/#{filename}"
 end
 
-post '/calculate/sqft/?' do
+post '/property/value/sqft/?' do
   results=geoWithin params[:boundary]
   area=params[:sqft]
   dollars=0
